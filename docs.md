@@ -1,6 +1,6 @@
 # Integrazione di Monokee Single Sign-On (OIDC) tramite FreeIPA
 
-# Indice
+## Indice
 - [Integrazione di Monokee Single Sign-On (OIDC) tramite FreeIPA](#integrazione-di-monokee-single-sign-on-oidc-tramite-freeipa)
     - [Indice](#indice)
   - [Introduzione](#introduzione)
