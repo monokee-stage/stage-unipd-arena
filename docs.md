@@ -1,16 +1,20 @@
 # Integrazione di Monokee Single Sign-On (OIDC) tramite FreeIPA
 
-### Indice
-  * [Introduzione](#introduzione)
-  * [Installazione di FreeIPA](#installazione-di-freeipa)
-    + [Requisiti di sistema](#requisiti-di-sistema)
-    + [Installazione](#installazione)
-    + [Accesso a FreeIPA](#accesso-a-freeipa)
-  * [Setup Monokee](#setup-monokee)
-    + [App OAuth](#app-oauth)
-    + [OpenID Connect Provider](#openid-connect-provider)
-  * [Setup IdP FreeIPA](#setup-idp-freeipa)
-
+# Indice
+- [Integrazione di Monokee Single Sign-On (OIDC) tramite FreeIPA](#integrazione-di-monokee-single-sign-on-oidc-tramite-freeipa)
+    - [Indice](#indice)
+  - [Introduzione](#introduzione)
+  - [Installazione di FreeIPA](#installazione-di-freeipa)
+    - [Requisiti di sistema](#requisiti-di-sistema)
+    - [Installazione](#installazione)
+    - [Accesso a FreeIPA](#accesso-a-freeipa)
+  - [Setup Monokee](#setup-monokee)
+    - [App OAuth](#app-oauth)
+    - [OpenID Connect Provider](#openid-connect-provider)
+  - [Setup IdP FreeIPA](#setup-idp-freeipa)
+    - [Setup Identity Provider Server](#setup-identity-provider-server)
+    - [Setup Utenti](#setup-utenti)
+  - [Autenticazione via CLI](#autenticazione-via-cli)
 ## Introduzione
 Il seguente documento illustra il procedimento per disporre un ambiente di Single Sign-On che utilizzi Monokee con OpenID Connect come external Identity Provider di FreeIPA.
 
@@ -117,12 +121,12 @@ Su [test.monokee.com](test.monokee.com) andare nella sezione *Applications*, cre
 
 In *Application assets*, aggiungere gli utenti (e/o i gruppi di utenti) ai quali si vuole consentire l'accesso sia nella sezione *Users* (e/o *Groups*) che nella relativa sezione in *Scopes*. 
 
-![Vista application assets](./res/monokee-oauth-users.png)
+![Vista OAuth users](./res/monokee-oauth-users.png)
 
 Andare sull'icona della matita per modificare l'applicazione e cliccare su *Next* per passare alle impostazioni del client. Qui scegliere un *Client ID* ed un *Client Secret* (quest'ultimo è possibile anche lasciarlo vuoto) ed impostare gli altri valori come da figura. 
 
-![Vista application assets](./res/monokee-oauth-client.png)
-![Vista application assets](./res/monokee-oauth-client-scopes.png)
+![Vista OAuth client configuration](./res/monokee-oauth-client.png)
+![Vista client scopes](./res/monokee-oauth-client-scopes.png)
 
 Cliccare nuovamente su *Next* ed impostare i valori della pagina come da figura.
 
@@ -140,11 +144,37 @@ Spuntare l'opzione *Display metadata*, scegliere un nome per il provider ed inse
 
 Spostarsi nella sezione *Advanced* ed impostare i valori come da figura.
 
-![Valori OpenID provider](./res/monokee-oidc-advanced.png)
+![Valori OpenID provider Advanceds](./res/monokee-oidc-advanced.png)
 
 
 ## Setup IdP FreeIPA
 
 *NB: è possibile effettuare le seguenti operazioni anche da terminale con degli specifici comandi, tuttavia, per comodità, viene mostrato il procedimento da web UI.*
+### Setup Identity Provider Server
+
+
+Autenticarsi sulla web UI di FreeIPA e spostarsi nella sezione *Authentication* > *Identity Provider servers*, cliccare su *Add* per creare un nuovo Identity Provider, scegliere un nome e compilare i campi con i rispettivi dati ed endpoint dell'applicazione OAuth e dell'OpenID Provider impostati precedentemente. 
+
+![Valori IdP](./res/ipa-idp.png)
+
+### Setup Utenti
+
+Spostarsi nella sezione *Identity* > *Users* > *Active users* e cliccare su *Add* per aggiungere un nuovo utente. Qui, nella sezione *User authentication types* disattivare tutti i metodi attivi ed attivare *External Identity Provider*. Poi, compilare i campi *External IdP configuration* e *External IdP user identifier*, rispettivamente, con il nome dell'Identity Provider Server impostato prima scegliendolo dal menù a tendina che apparirà, e con l'indirizzo e-mail dell'account Monokee.
+
+![Setup utente](./res/ipa-user.png)
+## Autenticazione via CLI
+
+A questo punto è tutto pronto per autenticare l'utente creato sulla macchina con Monokee. Bisogna accedere alla macchina con un utente locale e lanciare i seguenti comandi per richiedere un ticket Kerberos anonimo ed utilizzare il canale FAST per autenticarsi con l'utente che si è creato precedentemente (in questo caso l'utente si chiama *monokee1*).
+
+```
+kinit -n -c ./fast.ccache
+kinit -T ./fast.ccache monokee1
+```
+
+Lanciato il secondo comando apparirà un link alla schermata di login di Monokee e ad autenticazione avvenuta basterà tornare al terminale e premere *Invio*. Per verificare l'avvenuta autenticazione occorre lanciare il comando ```klist``` e controllare che il *Default principal* corrisponda all'utente desiderato e che il ticket sia valido.
+
+![Autenticazione Monokee](./res/ipa-cli.png)
+
+
 
 
