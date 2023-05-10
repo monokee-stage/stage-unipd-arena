@@ -23,7 +23,7 @@ Il seguente documento illustra il procedimento per disporre un ambiente di Singl
 ### Requisiti di sistema
 Per il server su cui installare FreeIPA è consigliata una macchina con CentOS Stream 9.
 
-È consigliabile anche lanciare i seguenti comandi per installare pacchetti utili.
+È consigliabile anche lanciare i seguenti comandi per installare pacchetti utili: EPEL (Extra Packages for Enterprise Linux) è un insieme di pacchetti di Fedora non presenti nativamente su sistemi RHEL, *bind-utils* contiene dei comandi per ottenere facilmente informazioni riguardanti i DNS, Vim è un editor di testo.
 
 ```
 sudo yum -y install epel-release
@@ -39,7 +39,7 @@ Lanciare il seguente comando per scaricare il pacchetto di FreeIPA.
 sudo yum -y install ipa-server
 ```
 
-È sufficiente modificare il file */etc/hosts* aggiungendo l'indirizzo IP della macchina su cui si sta effettuando l'installazione.
+In questa guida utilizzeremo FQDN, invece che DNS, per comodità. È sufficiente modificare il file */etc/hosts* aggiungendo l'indirizzo IP della macchina su cui si sta effettuando l'installazione.
 
 ```
 sudo vim /etc/hosts
@@ -100,7 +100,7 @@ files is the Directory Manager password
 ...
 ```
 
-È possibile che debbano essere aperte alcune porte in presenza di un firewall attivo, si consiglia, dunque, di lanciare i seguenti comandi.
+È possibile che debbano essere aperte alcune porte in presenza di un firewall attivo, si consiglia, dunque, di lanciare i seguenti comandi. Se il firewall non è attivo, si consiglia comunque di attivarlo e lanciare i comandi seguenti.
 
 ```
 sudo firewall-cmd --add-service={dns,freeipa-ldap,freeipa-ldaps} --permanent
@@ -109,7 +109,10 @@ sudo firewall-cmd --reload
 
 ### Accesso a FreeIPA
 
-È possibile accedere a FreeIPA da CLI, richiedendo un ticket Kerberos con il comando ```kinit admin``` oppure dall'interfaccia web, all'indirizzo uguale all'hostname che si è utilizzato (https://ipa.server.com/), inserendo come username *admin*; in entrambi i casi la password corrisponde a quella scelta durante il processo di installazione.  
+È possibile accedere a FreeIPA da CLI, richiedendo un ticket Kerberos con il comando ```kinit admin``` oppure dall'interfaccia web, all'indirizzo uguale all'hostname che si è utilizzato (https://ipa.server.com/), inserendo come username *admin*; in entrambi i casi la password corrisponde a quella scelta durante il processo di installazione. 
+
+![Vista schermata di login FreeIPA](./res/ipa-login.png)
+
 
 ## Setup Monokee
 
@@ -175,6 +178,11 @@ Lanciato il secondo comando apparirà un link alla schermata di login di Monokee
 
 ![Autenticazione Monokee](./res/ipa-cli.png)
 
+## Problemi
 
+Di seguito elencati alcuni dei problemi rilevati.
 
+- Facendo SSH su una macchina con un utente per il quale si è configurata l'autenticazione tramite Monokee, quindi non presente localmente ma gestito da FreeIPA, verrà chiesta la password, che non esiste per l'utente FreeIPA, perciò sarà impossibile accedere.
+
+- Potrebbe capitare che ci siano delle differenze tra i file di cache della macchina e quelli del server e che, quando si tenta l'accesso con ```kinit``` si riceva il seguente messaggio di errore: ```ipa: ERROR: No valid Negotiate header in server response```. In tal caso un riavvio della macchina virtuale e della macchina dalla quale si sta facendo SSH dovrebbe risolvere. 
 
